@@ -1,0 +1,29 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "migration:run": "tsx src/database/migrate.ts",
+    "studio": "drizzle-kit studio --config=src/config/drizzle.ts",
+    "make:migration": "drizzle-kit generate:sqlite --config=src/config/drizzle.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.30.1",
+    "fastify": "^4.26.2",
+    "valibot": "^0.30.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.9",
+    "drizzle-kit": "^0.20.14",
+    "pino-pretty": "^10.3.1",
+    "tsx": "^4.7.1"
+  }
+}
