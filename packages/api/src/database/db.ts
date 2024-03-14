@@ -6,8 +6,6 @@ import Database from 'better-sqlite3';
 
 const filename = resolve(process.cwd(), env.DB_FILENAME);
 
-console.log('filename', filename);
-
 export const sqlite = new Database(filename);
 
 export const db = drizzle(sqlite);
