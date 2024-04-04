@@ -17,6 +17,9 @@ export function createRequest<C extends Context>(url: string) {
     function middleware<M extends Middleware>(fn: M){
         const request = createRequest<C & MiddlewareResolvedContext<M>>(url)
 
+        
+        middlewares.forEach(fn => request._addMiddleware(fn))
+        
         request._addMiddleware(fn)
 
         return request
