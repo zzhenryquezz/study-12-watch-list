@@ -1,56 +1,48 @@
-import type { RawReplyDefaultExpression, RawRequestDefaultExpression, HTTPMethods } from 'fastify'
+import type { RawReplyDefaultExpression, FastifyRequest } from 'fastify'
 import { Middleware, MiddlewareResolvedContext } from './defineMiddleware.js'
-import { app } from  '../app.js'
 
-interface Context {
-    request: RawRequestDefaultExpression
+export interface Context {
+    request: FastifyRequest
     reply: RawReplyDefaultExpression
+    params: Record<string, string>
 }
 
-export function createRequest<C extends Context>(url: string) {
-    const middlewares: Middleware[] = []
+export interface RunFunction {
+    (url: string, middlewares: Middleware[], fn: (context: any) => Promise<any>): any
+}
 
-    function _addMiddleware(middleware: Middleware){
-        middlewares.push(middleware)
+
+export function createRequest<T extends RunFunction>(run: T){
+
+    function create<C extends Context>(url: string){
+
+        const middlewares: Middleware[] = []
+    
+        function _addMiddleware(middleware: Middleware){
+            middlewares.push(middleware)
+        }
+    
+        function middleware<M extends Middleware>(fn: M){
+            const request = create<C & MiddlewareResolvedContext<M>>(url)
+            
+            middlewares.forEach(fn => request._addMiddleware(fn))
+            
+            request._addMiddleware(fn)
+    
+            return request
+        }
+
+        async function internalRun(fn: (context: C) => Promise<any>){
+            return run(url, middlewares, fn)
+    
+        }
+    
+        return {
+            _addMiddleware,
+            middleware,
+            run: internalRun
+        }
     }
 
-    function middleware<M extends Middleware>(fn: M){
-        const request = createRequest<C & MiddlewareResolvedContext<M>>(url)
-
-        
-        middlewares.forEach(fn => request._addMiddleware(fn))
-        
-        request._addMiddleware(fn)
-
-        return request
-    }
-
-    function handler(method: HTTPMethods, fn: (context: C) => Promise<any>){
-        return app.route({
-            method,
-            url,
-            handler: async (request, reply) => {
-                let context: any = { request, reply }
-
-                for(const middleware of middlewares){
-                    context = await middleware(context)
-                }
-
-                return fn(context)
-            }
-        })
-
-    }
-
-    function get(fn: (context: C) => Promise<any>){
-        return handler('GET', fn)
-    }
-
-    return {
-        _addMiddleware,
-        middleware,
-
-        get,
-        handler
-    }
+    return (url: string) => create(url)
 }

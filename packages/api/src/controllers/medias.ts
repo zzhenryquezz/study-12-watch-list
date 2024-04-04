@@ -1,12 +1,32 @@
 import authentication from "@/middlewares/authentication.js";
 import authorization from "@/middlewares/authorization.js";
 
-import { createRequest } from '@/core/createRequest.js';
+import { get, post } from "@/core/rest.js";
 
-createRequest('/medias')
+get('/medias')
     .middleware(authentication)
     .middleware(authorization)
-    .get(async (context) => {
+    .run(async ({ user, role }) => {
+        return {
+            hello: 'world',
+            user: user,
+            role: role
+        }
+    })
+
+get('/medias/:id')
+    .middleware(authentication)
+    .middleware(authorization)
+    .run(async ({ request, user, role }) => {
+        return {
+            id: request.params.id,
+        }
+    })
+
+post('/medias')
+    .middleware(authentication)
+    .middleware(authorization)
+    .run(async (context) => {
         return {
             hello: 'world',
             user: context.user,
