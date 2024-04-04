@@ -1,6 +1,12 @@
 {
     "exclude": ["node_modules", "dist"],
+    "include": ["src"],
     "compilerOptions": {
+        "module": "NodeNext",
         "moduleResolution": "nodenext",
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"]
+        }
     }
 }

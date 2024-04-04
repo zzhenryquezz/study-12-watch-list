@@ -4,9 +4,7 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "start": "node dist/main.js",
-    "dev": "node bin/server.js",
-    "build": "node bin/build.js",
+    "dev": "tsx watch src/server.ts",
     "migration:run": "tsx src/database/migrate.ts",
     "studio": "drizzle-kit studio --config=src/config/drizzle.ts",
     "make:migration": "drizzle-kit generate:sqlite --config=src/config/drizzle.ts"
@@ -25,9 +23,8 @@
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.9",
     "drizzle-kit": "^0.20.14",
-    "esbuild": "^0.20.2",
-    "esbuild-plugin-tsc": "^0.4.0",
     "pino-pretty": "^10.3.1",
+    "replace-in-file": "^7.1.0",
     "tsx": "^4.7.1",
     "typescript": "^5.4.3"
   }

@@ -1,14 +1,13 @@
 import type { RawReplyDefaultExpression, RawRequestDefaultExpression, HTTPMethods } from 'fastify'
-import { Middleware, MiddlewareResolvedContext } from './defineMiddleware'
-
-import { app } from  '../app'
+import { Middleware, MiddlewareResolvedContext } from './defineMiddleware.js'
+import { app } from  '../app.js'
 
 interface Context {
     request: RawRequestDefaultExpression
     reply: RawReplyDefaultExpression
 }
 
-export function defineRequest<C extends Context>(url: string) {
+export function createRequest<C extends Context>(url: string) {
     const middlewares: Middleware[] = []
 
     function _addMiddleware(middleware: Middleware){
@@ -16,7 +15,7 @@ export function defineRequest<C extends Context>(url: string) {
     }
 
     function middleware<M extends Middleware>(fn: M){
-        const request = defineRequest<C & MiddlewareResolvedContext<M>>(url)
+        const request = createRequest<C & MiddlewareResolvedContext<M>>(url)
 
         request._addMiddleware(fn)
 

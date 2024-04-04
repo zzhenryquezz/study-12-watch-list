@@ -1,13 +1,9 @@
-import { RouteHandlerMethod } from "fastify";
-import { defineRequest } from "../core/defineRequest";
-import authentication from "../middlewares/authentication";
-import authorization from "../middlewares/authorization";
+import authentication from "@/middlewares/authentication.js";
+import authorization from "@/middlewares/authorization.js";
 
-export const getMedias: RouteHandlerMethod = (request, reply) => {
-    return reply.send({ hello: 'world' })
-}
+import { createRequest } from '@/core/createRequest.js';
 
-export const createMedia = defineRequest('/medias')
+createRequest('/medias')
     .middleware(authentication)
     .middleware(authorization)
     .get(async (context) => {
