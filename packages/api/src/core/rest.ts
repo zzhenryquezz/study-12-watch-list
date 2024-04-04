@@ -1,31 +1,42 @@
+import { FastifyReply, FastifyRequest } from 'fastify'
 import { app } from  '../app.js'
 import { createRequest } from './createRequest.js'
 
-export const get = createRequest(({ url, middlewares, fn, schema }) => {
-    console.log('url', schema)
-    app.get(url, { schema }, async (request, reply) => {
-        let context: any = {
-            request,
-            reply
-        }
+export function get(url: string) {    
+    const request = createRequest()
+        .middleware(async (context) => {
+            return {
+                request: undefined as any as FastifyRequest,
+                response: undefined as any as FastifyReply,
+                ...context,
+            }
+        })
 
-        for(const middleware of middlewares){
-            context = await middleware(context)
-        }
+    request.run = async (fn) => {
+        app.get(url, async (req, res) => {
 
-        return fn(context)
-    })
-})
+            const context = await request.createContext({
+                request: req,
+                response: res
+            })
+            
+            return fn(context)
+        })
+    }
 
-export const post = createRequest(({ url, middlewares, fn, schema }) => {
-    app.get(url, { schema }, async (request, reply) => {
-        let context: any = { request, reply }
+    return request
+       
+}
 
-        for(const middleware of middlewares){
-            context = await middleware(context)
-        }
+// export const post = createRequest(({ url, middlewares, fn, schema }) => {
+//     app.get(url, { schema }, async (request, reply) => {
+//         let context: any = { request, reply }
 
-        return fn(context)
-    })
-})
+//         for(const middleware of middlewares){
+//             context = await middleware(context)
+//         }
+
+//         return fn(context)
+//     })
+// })
 

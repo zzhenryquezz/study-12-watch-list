@@ -1,11 +1,6 @@
-import type { RawReplyDefaultExpression, FastifyRequest } from 'fastify'
 import { Middleware, MiddlewareResolvedContext } from './defineMiddleware.js'
 
-export interface Context {
-    request: FastifyRequest
-    reply: RawReplyDefaultExpression
-    params: Record<string, string>
-}
+export interface Context {}
 
 export interface RunFunctionParams {
     url: string
@@ -18,60 +13,39 @@ export interface RunFunction {
     (args: RunFunctionParams): Promise<any> | any
 }
 
-export function createRequest<T extends RunFunction>(run: T){
-    function create<C extends Context>(url: string){
+export function createRequest<C extends Context>(){
 
-        const middlewares: Middleware[] = []
-        let _schema: any = {}
-    
-        function _addMiddleware(middleware: Middleware){
-            middlewares.push(middleware)
-        }
+    const middlewares: Middleware[] = []
 
-        function _setSchema(newSchema: any){
-            _schema = newSchema
-        }
-    
-        function middleware<M extends Middleware>(fn: M){
-            const request = create<C & MiddlewareResolvedContext<M>>(url)
-            
-            middlewares.forEach(fn => request._addMiddleware(fn))
-            
-            request._addMiddleware(fn)
-            request._setSchema(schema)
-    
-            return request
-        }
+    function middleware<M extends Middleware>(fn: M){        
+        middlewares.push(fn)
 
-        function schema(newSchema: any){
-            const request = create<C>(url)
-            
-            middlewares.forEach(fn => request._addMiddleware(fn))
-            
-            request._setSchema(newSchema)
-    
-            return request
-        }
-
-        async function internalRun(fn: (context: C) => Promise<any>){
-            return run({
-                url,
-                middlewares,
-                fn,
-                schema: _schema
-            })
-    
-        }
-    
-        return {
-            _addMiddleware,
-            _setSchema,
-
-            schema,
-            middleware,
-            run: internalRun
-        }
+        return this as ReturnType<typeof createRequest<C & MiddlewareResolvedContext<M>>>
     }
 
-    return (url: string) => create(url)
+    async function createContext(initialContext: Record<string, any> = {}){
+        let context: any = initialContext
+
+        for(const middleware of middlewares){
+            context = await middleware(context)
+        }
+
+        return context
+    }
+    
+    async function run(fn: (context: C) => Promise<any>){
+        let context: any = {  }
+
+        for(const middleware of middlewares){
+            context = await middleware(context)
+        }
+
+        return fn(context)
+    }
+
+    return {
+        middleware,
+        createContext,
+        run
+    }
 }

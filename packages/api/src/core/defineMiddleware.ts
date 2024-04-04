@@ -1,8 +1,5 @@
-import type { RawReplyDefaultExpression, RawRequestDefaultExpression } from 'fastify'
-
 interface Context {
-    request: RawRequestDefaultExpression
-    reply: RawReplyDefaultExpression
+    [key: string]: any
 }
 
 export type Middleware = ReturnType<typeof defineMiddleware>
